@@ -33,3 +33,8 @@
 - Doktorların Müsait Günlerinin Yönetimi
 - Doktorların müsait günlerini ekleme, bilgilerini güncelleme, görüntüleme ve silme
 
+### UML diyagram
+
+![image](https://github.com/HazalOZER/vet/assets/109552542/bb14e08f-2944-4e7b-bde2-19a7ebe21118)
+
+
