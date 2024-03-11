@@ -1,5 +1,6 @@
 package com.example.vet.core.config;
 
+import com.example.vet.core.exceptions.AlreadyExistsException;
 import com.example.vet.core.exceptions.NotFoundException;
 import com.example.vet.core.result.Result;
 import com.example.vet.core.result.ResultData;
@@ -29,4 +30,10 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(ResultHelper.validateError(validationErrorList), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<Result> handleAlreadyExistsException(AlreadyExistsException e) {
+        return new ResponseEntity<>(ResultHelper.notFoundError(e.getMessage()), HttpStatus.EXPECTATION_FAILED);
+    }
+
 }

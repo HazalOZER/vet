@@ -22,6 +22,6 @@ public interface IAppointmentService {
     ResultData<AppointmentResponse> update(AppointmentUpdateRequest appointmentUpdateRequest);
 
     Result delete(long id);
-    public ResultData<List<AppointmentResponse>> getByDateAndDoctor(LocalDate date, long doctorId);
-    public ResultData<List<AppointmentResponse>> getByDateAndAnimal(LocalDate date, long animalId);
+    public ResultData<List<AppointmentResponse>> getByDateAndDoctor(LocalDate startDate, LocalDate finishDate, long doctorId);
+    public ResultData<List<AppointmentResponse>> getByDateAndAnimal(LocalDate date,LocalDate finishDate, long animalId);
 }

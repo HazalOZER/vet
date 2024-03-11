@@ -2,6 +2,7 @@ package com.example.vet.bussines.concretes;
 
 import com.example.vet.bussines.abstracts.IDoctorService;
 import com.example.vet.core.config.modelMapper.IModelMapperService;
+import com.example.vet.core.exceptions.AlreadyExistsException;
 import com.example.vet.core.exceptions.NotFoundException;
 import com.example.vet.core.result.Result;
 import com.example.vet.core.result.ResultData;
@@ -33,6 +34,12 @@ public class DoctorManager implements IDoctorService {
     @Override
     public ResultData<DoctorResponse> save(DoctorSaveRequest doctorSaveRequest) {
         Doctor doctor = this.modelMapper.forRequest().map(doctorSaveRequest,Doctor.class);
+        Doctor control = this.doctorRepo.findByPhoneAndMail(doctorSaveRequest.getPhone(),doctorSaveRequest.getMail());
+
+        if (control != null) {
+            throw new AlreadyExistsException(Msg.ALREADY_EXISTS);
+        }
+
         this.doctorRepo.save(doctor);
         DoctorResponse doctorResponse = this.modelMapper.forResponse().map(doctor,DoctorResponse.class);
         return ResultHelper.created(doctorResponse);

@@ -21,6 +21,7 @@ public class ResultHelper {
     public static Result notFoundError (String msg){
         return new Result(false,msg,"404");
     }
+    public static Result alreadyExistsError(String msg){return new Result(false,msg,"417");}
     public static <T> ResultData< CursorResponse<T>> cursor( Page <T> pageData){
         CursorResponse<T> cursor = new CursorResponse<>();
         cursor.setItems(pageData.getContent());

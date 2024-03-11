@@ -2,6 +2,7 @@ package com.example.vet.bussines.concretes;
 
 import com.example.vet.bussines.abstracts.ICustomerService;
 import com.example.vet.core.config.modelMapper.IModelMapperService;
+import com.example.vet.core.exceptions.AlreadyExistsException;
 import com.example.vet.core.exceptions.NotFoundException;
 import com.example.vet.core.result.Result;
 import com.example.vet.core.result.ResultData;
@@ -38,6 +39,12 @@ public class CustomerManager implements ICustomerService {
     public ResultData<CustomerResponse> save(CustomerSaveRequest customerSaveRequest) {
 
         Customer customer = this.modelMapper.forRequest().map(customerSaveRequest, Customer.class);
+        Customer control = this.customerRepo.findByPhoneAndMail(customerSaveRequest.getPhone(), customerSaveRequest.getMail());
+
+        if (control != null) {
+            throw new AlreadyExistsException(Msg.ALREADY_EXISTS);
+        }
+
         this.customerRepo.save(customer);
         CustomerResponse customerResponse = this.modelMapper.forResponse().map(customer, CustomerResponse.class);
 
@@ -81,12 +88,12 @@ public class CustomerManager implements ICustomerService {
 
     @Override
     public ResultData<List<AnimalResponse>> getAnimals(long id) {
-       Customer customer = this.get(id);
+        Customer customer = this.get(id);
 
-        List < Animal> animals = customer.getAnimals();
-        List<AnimalResponse> animalResponseList= new ArrayList<>();
-        for (Animal animal:animals) {
-            animalResponseList.add(this.modelMapper.forResponse().map(animal,AnimalResponse.class));
+        List<Animal> animals = customer.getAnimals();
+        List<AnimalResponse> animalResponseList = new ArrayList<>();
+        for (Animal animal : animals) {
+            animalResponseList.add(this.modelMapper.forResponse().map(animal, AnimalResponse.class));
         }
         return ResultHelper.success(animalResponseList);
     }
@@ -94,16 +101,16 @@ public class CustomerManager implements ICustomerService {
     @Override
     public ResultData<List<CustomerResponse>> getByName(String name) {
 
-        List<Customer> customers =this.customerRepo.findByName(name);
+        List<Customer> customers = this.customerRepo.findByName(name);
 
-        if(customers.isEmpty()){
+        if (customers.isEmpty()) {
             new NotFoundException(Msg.NOT_FOUND);
         }
 
         List<CustomerResponse> customerResponseList = new ArrayList<>();
 
-        for (Customer customer : customers){
-            customerResponseList.add(this.modelMapper.forResponse().map(customer,CustomerResponse.class));
+        for (Customer customer : customers) {
+            customerResponseList.add(this.modelMapper.forResponse().map(customer, CustomerResponse.class));
         }
 
 

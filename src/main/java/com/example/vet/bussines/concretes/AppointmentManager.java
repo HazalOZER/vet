@@ -24,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,42 +50,42 @@ public class AppointmentManager implements IAppointmentService {
         //-Değerlendirme Formu 18
 
 
-        if( appointmentSaveRequest.getAppointmentDate().getMinute()!= 00.00){
+        if (appointmentSaveRequest.getAppointmentDate().getMinute() != 00.00) {
 
             throw new NotFoundException("Tam saatler dışında randavu seçeneği bulunmamaktadır");
 
         }
 
-        List<AvailableDate> availableDateList= doctor.getAvailableDates();
+        List<AvailableDate> availableDateList = doctor.getAvailableDates();
 
         boolean isAvailable = false;
-        for (AvailableDate date: availableDateList) {
+        for (AvailableDate date : availableDateList) {
             isAvailable = date.getAvailableDate().equals(appointmentSaveRequest.getAppointmentDate().toLocalDate());
-            if(isAvailable) break;
+            if (isAvailable) break;
         }
-        if (!isAvailable){
+        if (!isAvailable) {
             throw new NotFoundException("Doktor seçilen tarihte müssaitliği bulunmamaktadır");
         }
-        List <Appointment> appointmentList = doctor.getAppointments();
+        List<Appointment> appointmentList = doctor.getAppointments();
 
         boolean isBusy = false;
 
-        for (Appointment appointment :appointmentList){
-            isBusy= appointment.getAppointmentDate().equals(appointmentSaveRequest.getAppointmentDate());
-            if(isBusy) throw new  NotFoundException("Doktoron randevu saatinde müsaitliği bulunmamaktadır ");
+        for (Appointment appointment : appointmentList) {
+            isBusy = appointment.getAppointmentDate().equals(appointmentSaveRequest.getAppointmentDate());
+            if (isBusy) throw new NotFoundException("Doktoron randevu saatinde müsaitliği bulunmamaktadır ");
         }
 
 
         Animal animal = this.animalService.get(appointmentSaveRequest.getAnimalId());
         appointmentSaveRequest.setAnimalId(0);
 
-        Appointment appointment = this.modelMapper.forRequest().map(appointmentSaveRequest,Appointment.class);
+        Appointment appointment = this.modelMapper.forRequest().map(appointmentSaveRequest, Appointment.class);
         appointment.setAnimal(animal);
         appointment.setDoctor(doctor);
 
         this.appointmentRepo.save(appointment);
 
-        AppointmentResponse appointmentResponse = this.modelMapper.forResponse().map(appointment,AppointmentResponse.class);
+        AppointmentResponse appointmentResponse = this.modelMapper.forResponse().map(appointment, AppointmentResponse.class);
         return ResultHelper.created(appointmentResponse);
 
     }
@@ -102,7 +101,7 @@ public class AppointmentManager implements IAppointmentService {
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<Appointment> appointmentPage = this.appointmentRepo.findAll(pageable);
         Page<AppointmentResponse> appointmentResponsePage = appointmentPage
-                .map(appointment -> this.modelMapper.forResponse().map(appointment,AppointmentResponse.class));
+                .map(appointment -> this.modelMapper.forResponse().map(appointment, AppointmentResponse.class));
 
         return ResultHelper.cursor(appointmentResponsePage);
     }
@@ -110,17 +109,17 @@ public class AppointmentManager implements IAppointmentService {
     @Override
     public ResultData<AppointmentResponse> update(AppointmentUpdateRequest appointmentUpdateRequest) {
         this.get(appointmentUpdateRequest.getId());
-        Appointment appointment = this.modelMapper.forRequest().map(appointmentUpdateRequest,Appointment.class);
-        if(appointmentUpdateRequest.getAnimalId() != 0){
-            Animal animal =this.animalService.get(appointmentUpdateRequest.getAnimalId());
+        Appointment appointment = this.modelMapper.forRequest().map(appointmentUpdateRequest, Appointment.class);
+        if (appointmentUpdateRequest.getAnimalId() != 0) {
+            Animal animal = this.animalService.get(appointmentUpdateRequest.getAnimalId());
             appointment.setAnimal(animal);
         }
-        if (appointmentUpdateRequest.getDoctorId() != 0){
+        if (appointmentUpdateRequest.getDoctorId() != 0) {
             Doctor doctor = this.doctorService.get(appointmentUpdateRequest.getDoctorId());
             appointment.setDoctor(doctor);
         }
         this.appointmentRepo.save(appointment);
-        AppointmentResponse appointmentResponse = this.modelMapper.forResponse().map(appointment,AppointmentResponse.class);
+        AppointmentResponse appointmentResponse = this.modelMapper.forResponse().map(appointment, AppointmentResponse.class);
 
         return ResultHelper.success(appointmentResponse);
     }
@@ -132,27 +131,51 @@ public class AppointmentManager implements IAppointmentService {
         return ResultHelper.ok();
     }
 
-    public ResultData<List<AppointmentResponse>> getByDateAndDoctor(LocalDate date, long doctorId){
+    public ResultData<List<AppointmentResponse>> getByDateAndDoctor(LocalDate startDate, LocalDate finishDate, long doctorId) {
 
         Doctor doctor = this.doctorService.get(doctorId);
         List<Appointment> appointmentList = doctor.getAppointments();
-        List<AppointmentResponse> appointmentResponseList= new ArrayList<>();
-        for (Appointment appointment : appointmentList){
-            if(appointment.getAppointmentDate().toLocalDate().equals(date)){
-                appointmentResponseList.add(this.modelMapper.forResponse().map(appointment,AppointmentResponse.class));
+        List<AppointmentResponse> appointmentResponseList = new ArrayList<>();
+
+        for (Appointment appointment : appointmentList) {
+            if (
+                    (
+                            appointment.getAppointmentDate().toLocalDate().isAfter(startDate)
+                                    &&
+                                    appointment.getAppointmentDate().toLocalDate().isBefore(finishDate)
+                    )
+                            ||
+
+                            appointment.getAppointmentDate().toLocalDate().equals(startDate)
+                            ||
+                            appointment.getAppointmentDate().toLocalDate().equals(finishDate)
+
+            ) {
+                appointmentResponseList.add(this.modelMapper.forResponse().map(appointment, AppointmentResponse.class));
             }
         }
         return ResultHelper.success(appointmentResponseList);
 
     }
 
-    public ResultData<List<AppointmentResponse>> getByDateAndAnimal(LocalDate date, long animalId){
+    public ResultData<List<AppointmentResponse>> getByDateAndAnimal(LocalDate startDate, LocalDate finishDate, long animalId) {
         Animal animal = this.animalService.get(animalId);
         List<Appointment> appointmentList = animal.getAppointments();
-        List<AppointmentResponse> appointmentResponseList= new ArrayList<>();
-        for (Appointment appointment : appointmentList){
-            if(appointment.getAppointmentDate().toLocalDate().equals(date)){
-                appointmentResponseList.add(this.modelMapper.forResponse().map(appointment,AppointmentResponse.class));
+        List<AppointmentResponse> appointmentResponseList = new ArrayList<>();
+        for (Appointment appointment : appointmentList) {
+            if (
+                    (
+                            appointment.getAppointmentDate().toLocalDate().isAfter(startDate)
+                                    &&
+                                    appointment.getAppointmentDate().toLocalDate().isBefore(finishDate)
+                    )
+                            ||
+                            appointment.getAppointmentDate().toLocalDate().equals(startDate)
+                            ||
+                            appointment.getAppointmentDate().toLocalDate().equals(finishDate)
+
+            ) {
+                appointmentResponseList.add(this.modelMapper.forResponse().map(appointment, AppointmentResponse.class));
             }
         }
         return ResultHelper.success(appointmentResponseList);

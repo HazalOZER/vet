@@ -3,6 +3,7 @@ package com.example.vet.bussines.concretes;
 import com.example.vet.bussines.abstracts.IAvailableDateService;
 import com.example.vet.bussines.abstracts.IDoctorService;
 import com.example.vet.core.config.modelMapper.IModelMapperService;
+import com.example.vet.core.exceptions.AlreadyExistsException;
 import com.example.vet.core.exceptions.NotFoundException;
 import com.example.vet.core.result.Result;
 import com.example.vet.core.result.ResultData;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AvailableDateManager implements IAvailableDateService {
@@ -37,6 +40,15 @@ public class AvailableDateManager implements IAvailableDateService {
 
         Doctor doctor = this.doctorService.get(availableDateSaveRequest.getDoctorId());
         availableDateSaveRequest.setDoctorId(0);
+
+
+
+        List<AvailableDate> availableDateList = doctor.getAvailableDates();
+        for (AvailableDate dates: availableDateList) {
+            if (availableDateSaveRequest.getAvailableDate().equals(dates.getAvailableDate())){
+                throw new AlreadyExistsException(Msg.ALREADY_EXISTS);
+            }
+        }
 
         AvailableDate availableDate = this.modelMapper.forRequest().map(availableDateSaveRequest, AvailableDate.class);
 

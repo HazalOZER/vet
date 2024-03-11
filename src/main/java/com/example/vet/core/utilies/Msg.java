@@ -6,5 +6,6 @@ public class Msg {
     public static final String  OK = "İşlem başarılı";
     public static final String  NOT_FOUND = "Veri Bulunamadı";
     public static final String  VACCINE = "Aşı koruyuculu devam etmektedir";
-    public static final String NOT_AVAILABLE ="Seçilen günde veteriner hekimimiz çalışmamaktadır ";
+    public static final String NOT_AVAILABLE ="Seçilen günde veteriner hekimimiz çalışmamaktadır" ;
+    public static final String ALREADY_EXISTS = "Talep edilen veri zaten mevcut";
 }

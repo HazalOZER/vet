@@ -6,8 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface AppointmentRepo extends JpaRepository<Appointment,Long> {
+    //List<Appointment> findByAppointmentDateBetween(LocalDate startDate, LocalDate finishDate);
 
 }

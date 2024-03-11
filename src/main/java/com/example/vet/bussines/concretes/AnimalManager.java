@@ -3,6 +3,7 @@ package com.example.vet.bussines.concretes;
 import com.example.vet.bussines.abstracts.IAnimalService;
 import com.example.vet.bussines.abstracts.ICustomerService;
 import com.example.vet.core.config.modelMapper.IModelMapperService;
+import com.example.vet.core.exceptions.AlreadyExistsException;
 import com.example.vet.core.exceptions.NotFoundException;
 import com.example.vet.core.result.Result;
 import com.example.vet.core.result.ResultData;
@@ -41,6 +42,18 @@ public class AnimalManager implements IAnimalService {
     @Override
     public ResultData<AnimalResponse> save(AnimalSaveRequest animalSaveRequest) {
         Customer customer = this.customerService.get(animalSaveRequest.getCustomerId());
+
+        Animal control = this.animalRepo.findByNameAndBreedAndGenderAndColourAndDateOfBirthAndCustomer(animalSaveRequest.getName(),
+                animalSaveRequest.getBreed(),
+                animalSaveRequest.getGender(),
+                animalSaveRequest.getColour(),
+                animalSaveRequest.getDateOfBirth(),
+                customer);
+
+        if (control != null) {
+            throw new AlreadyExistsException(Msg.ALREADY_EXISTS);
+        }
+
         animalSaveRequest.setCustomerId(0);
 
         Animal animal = this.modelMapper.forRequest().map(animalSaveRequest, Animal.class);

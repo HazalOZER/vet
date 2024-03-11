@@ -66,18 +66,20 @@ public class AppointmentController {
     @GetMapping("/get-by-date-and-doctor")
     @ResponseStatus(HttpStatus.OK)
     public ResultData<List<AppointmentResponse>> getByDateAndDoctor(
-            @RequestParam (name = "date")LocalDate date,
+            @RequestParam (name = "startDate")LocalDate startDate,
+            @RequestParam (name = "finishDate")LocalDate finishDate,
             @RequestParam(name ="doctorId") long doctorId
             ){
-        return this.appointmentService.getByDateAndDoctor(date,doctorId);
+        return this.appointmentService.getByDateAndDoctor(startDate,finishDate,doctorId);
     }
     @GetMapping("/get-by-date-and-animal")
     @ResponseStatus(HttpStatus.OK)
     public ResultData<List<AppointmentResponse>> getByDateAndAnimal(
-            @RequestParam (name = "date")LocalDate date,
+            @RequestParam (name = "startDate")LocalDate startDate,
+            @RequestParam (name = "finishDate")LocalDate finishDate,
             @RequestParam(name ="animalId") long animalId
     ){
-        return this.appointmentService.getByDateAndAnimal(date,animalId);
+        return this.appointmentService.getByDateAndAnimal(startDate,finishDate,animalId);
     }
 
 }
